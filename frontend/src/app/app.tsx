@@ -152,7 +152,7 @@ function AppInner() {
                         <AdminUsersPage
                           users={adminUsers}
                           submitting={submitting}
-                          currentAdminId={user!.id}
+                          currentAdminId={user?.id ?? 0}
                           onCreateUser={handleCreateAdminUser}
                           onToggleUserStatus={handleToggleAdminUserStatus}
                         />
