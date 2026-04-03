@@ -10,9 +10,10 @@ def test_bootstrap_admin_creates_admin(monkeypatch) -> None:
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
-        result = bootstrap_admin(
+        result, auth_session = bootstrap_admin(
             session,
             BootstrapAdminRequest(username="admin", password="password123"),
         )
 
     assert result.username == "admin"
+    assert auth_session.session_token is not None

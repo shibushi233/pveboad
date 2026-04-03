@@ -11,6 +11,10 @@ export type LoginResponse = {
   user: UserSummary
 }
 
+export type SetupStatusResponse = {
+  needs_setup: boolean
+}
+
 export type KVMItem = {
   node_id: number
   node_name: string

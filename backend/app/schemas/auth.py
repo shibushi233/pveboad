@@ -33,3 +33,7 @@ class BootstrapAdminResponse(BaseModel):
     id: int
     username: str
     message: str
+
+
+class SetupStatusResponse(BaseModel):
+    needs_setup: bool

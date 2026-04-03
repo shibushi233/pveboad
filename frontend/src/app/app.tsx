@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 import { AppShell } from './app-shell'
-import { AdminRoute, GuestRoute, ProtectedRoute } from './route-guards'
+import { AdminRoute, GuestRoute, ProtectedRoute, SetupRoute } from './route-guards'
 import { useAppState } from './use-app-state'
 import { formatBytes, formatPercent, formatSeconds, metricSummary } from '../lib/format'
 
@@ -13,6 +13,7 @@ const AdminUsersPage = lazy(async () => import('../pages/admin-users-page').then
 const KvmListPage = lazy(async () => import('../pages/kvm-list-page').then((module) => ({ default: module.KvmListPage })))
 const LoginPage = lazy(async () => import('../pages/login-page').then((module) => ({ default: module.LoginPage })))
 const PasswordPage = lazy(async () => import('../pages/password-page').then((module) => ({ default: module.PasswordPage })))
+const SetupPage = lazy(async () => import('../pages/setup-page').then((module) => ({ default: module.SetupPage })))
 
 function RouteFallback() {
   return <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-600">页面加载中...</div>
@@ -50,12 +51,16 @@ function AppInner() {
     selectedNodeInventory,
     adminError,
     mustChangePasswordBanner,
+    needsSetup,
+    setupForm,
     setLoginForm,
     setPasswordForm,
+    setSetupForm,
     setNodeForm,
     setPermissionForm,
     handleLogin,
     handleLogout,
+    handleSetup,
     loadKvmWorkspaceByIds,
     handleKvmAction,
     handleChangePassword,
@@ -75,9 +80,25 @@ function AppInner() {
   return (
     <Routes>
       <Route
+        path="/setup"
+        element={
+          <SetupRoute user={user} needsSetup={needsSetup}>
+            <Suspense fallback={<RouteFallback />}>
+              <SetupPage
+                setupForm={setupForm}
+                submitting={submitting}
+                error={error}
+                onSetupFormChange={setSetupForm}
+                onSubmit={handleSetup}
+              />
+            </Suspense>
+          </SetupRoute>
+        }
+      />
+      <Route
         path="/login"
         element={
-          <GuestRoute user={user}>
+          <GuestRoute user={user} needsSetup={needsSetup}>
             <Suspense fallback={<RouteFallback />}>
               <LoginPage
                 loginForm={loginForm}
@@ -93,7 +114,7 @@ function AppInner() {
       <Route
         path="*"
         element={
-          <ProtectedRoute user={user}>
+          <ProtectedRoute user={user} needsSetup={needsSetup}>
             <AppShell
               user={user!}
               kvmsCount={kvms.length}

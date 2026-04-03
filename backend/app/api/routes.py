@@ -14,6 +14,7 @@ from app.schemas.auth import (
     ChangePasswordRequest,
     LoginRequest,
     LoginResponse,
+    SetupStatusResponse,
     UserSummary,
 )
 from app.schemas.health import HealthResponse
@@ -28,7 +29,7 @@ from app.schemas.node import NodeCreateRequest, NodeCreateResponse, NodeInventor
 from app.schemas.permission import PermissionAssignRequest, PermissionItem
 from app.schemas.user_admin import AdminUserCreateRequest, AdminUserListItem, AdminUserUpdateStatusRequest
 from app.schemas.vnc import VNCBootstrapResponse
-from app.services.auth_service import bootstrap_admin, change_password, login_user, logout_session, user_to_summary
+from app.services.auth_service import bootstrap_admin, change_password, login_user, logout_session, needs_setup, user_to_summary
 from app.services.kvm_service import (
     get_kvm_current_metrics,
     get_kvm_detail,
@@ -56,9 +57,27 @@ def get_supported_pve_versions() -> list[str]:
     return list(settings.allowed_pve_versions)
 
 
+@api_router.get("/auth/setup-status", response_model=SetupStatusResponse)
+def check_setup_status(session: Session = Depends(get_session)) -> SetupStatusResponse:
+    return SetupStatusResponse(needs_setup=needs_setup(session))
+
+
 @api_router.post("/auth/bootstrap-admin", response_model=BootstrapAdminResponse, status_code=status.HTTP_201_CREATED)
-def create_bootstrap_admin(payload: BootstrapAdminRequest, session: Session = Depends(get_session)) -> BootstrapAdminResponse:
-    return bootstrap_admin(session, payload)
+def create_bootstrap_admin(
+    payload: BootstrapAdminRequest,
+    response: Response,
+    session: Session = Depends(get_session),
+) -> BootstrapAdminResponse:
+    result, auth_session = bootstrap_admin(session, payload)
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=auth_session.session_token,
+        httponly=True,
+        samesite="lax",
+        secure=settings.force_https_cookies,
+        max_age=SESSION_TTL_DAYS * 24 * 60 * 60,
+    )
+    return result
 
 
 @api_router.post("/auth/login", response_model=LoginResponse)

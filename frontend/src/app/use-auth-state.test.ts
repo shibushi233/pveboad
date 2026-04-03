@@ -30,6 +30,7 @@ describe('useAuthState', () => {
     const navigate = vi.fn()
     mockedApiFetch
       .mockRejectedValueOnce(new Error('未登录'))
+      .mockResolvedValueOnce({ needs_setup: false })
       .mockResolvedValueOnce({
         message: '登录成功',
         user: { id: 2, username: 'user1', role: 'user', must_change_password: false, is_active: true },
@@ -50,7 +51,7 @@ describe('useAuthState', () => {
       await result.current.handleLogin({ preventDefault() {} } as React.FormEvent)
     })
 
-    expect(mockedApiFetch).toHaveBeenNthCalledWith(2, '/auth/login', {
+    expect(mockedApiFetch).toHaveBeenNthCalledWith(3, '/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username: 'user1', password: 'password123' }),
     })

@@ -2,7 +2,9 @@ import { FormEvent, useEffect, useMemo, useState } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 
 import { apiFetch } from '../lib/api'
-import type { LoginResponse, UserSummary } from '../types/api'
+import type { LoginResponse, SetupStatusResponse, UserSummary } from '../types/api'
+
+type SetupForm = { username: string; password: string; confirm_password: string }
 
 type UseAuthStateParams = {
   navigate: NavigateFunction
@@ -18,6 +20,8 @@ export function useAuthState({ navigate, pathname, onAfterLogin }: UseAuthStateP
   const [pageMessage, setPageMessage] = useState<string | null>(null)
   const [loginForm, setLoginForm] = useState({ username: '', password: '' })
   const [passwordForm, setPasswordForm] = useState({ current_password: '', new_password: '', confirm_password: '' })
+  const [needsSetup, setNeedsSetup] = useState(false)
+  const [setupForm, setSetupForm] = useState<SetupForm>({ username: '', password: '', confirm_password: '' })
 
   async function loadSession() {
     setLoading(true)
@@ -28,9 +32,14 @@ export function useAuthState({ navigate, pathname, onAfterLogin }: UseAuthStateP
       if (onAfterLogin) {
         await onAfterLogin(me)
       }
-    } catch (err) {
+    } catch {
       setUser(null)
-      if (err instanceof Error) setError(err.message)
+      try {
+        const status = await apiFetch<SetupStatusResponse>('/auth/setup-status')
+        setNeedsSetup(status.needs_setup)
+      } catch {
+        setNeedsSetup(false)
+      }
     } finally {
       setLoading(false)
     }
@@ -41,11 +50,44 @@ export function useAuthState({ navigate, pathname, onAfterLogin }: UseAuthStateP
   }, [])
 
   useEffect(() => {
+    if (loading) return
+    if (needsSetup && pathname !== '/setup') {
+      navigate('/setup', { replace: true })
+    }
+  }, [needsSetup, loading, pathname, navigate])
+
+  useEffect(() => {
     if (!user) return
     if (user.must_change_password && pathname !== '/password') {
       navigate('/password', { replace: true })
     }
   }, [user, pathname, navigate])
+
+  async function handleSetup(event: FormEvent) {
+    event.preventDefault()
+    if (setupForm.password !== setupForm.confirm_password) {
+      setError('两次输入的密码不一致')
+      return
+    }
+    if (setupForm.password.length < 8) {
+      setError('密码长度至少为8位')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await apiFetch('/auth/bootstrap-admin', {
+        method: 'POST',
+        body: JSON.stringify({ username: setupForm.username, password: setupForm.password }),
+      })
+      setNeedsSetup(false)
+      setError(null)
+      await loadSession()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '初始化失败')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   async function handleLogin(event: FormEvent) {
     event.preventDefault()
@@ -108,14 +150,18 @@ export function useAuthState({ navigate, pathname, onAfterLogin }: UseAuthStateP
     pageMessage,
     loginForm,
     passwordForm,
+    needsSetup,
+    setupForm,
     mustChangePasswordBanner,
     setLoginForm,
     setPasswordForm,
+    setSetupForm,
     setPageMessage,
     setSubmitting,
     setError,
     handleLogin,
     handleLogout,
     handleChangePassword,
+    handleSetup,
   }
 }

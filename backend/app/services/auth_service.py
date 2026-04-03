@@ -22,7 +22,12 @@ def user_to_summary(user: User) -> UserSummary:
     )
 
 
-def bootstrap_admin(session: Session, payload: BootstrapAdminRequest) -> BootstrapAdminResponse:
+def needs_setup(session: Session) -> bool:
+    existing_admin = session.exec(select(User).where(User.role == "admin")).first()
+    return existing_admin is None
+
+
+def bootstrap_admin(session: Session, payload: BootstrapAdminRequest) -> tuple[BootstrapAdminResponse, UserSession]:
     existing_admin = session.exec(select(User).where(User.role == "admin")).first()
     if existing_admin:
         raise ConflictError("管理员已存在，不能重复初始化")
@@ -41,7 +46,16 @@ def bootstrap_admin(session: Session, payload: BootstrapAdminRequest) -> Bootstr
     session.add(user)
     session.commit()
     session.refresh(user)
-    return BootstrapAdminResponse(id=user.id or 0, username=user.username, message="管理员初始化成功")
+
+    auth_session = build_session(user.id or 0)
+    session.add(auth_session)
+    session.commit()
+    session.refresh(auth_session)
+
+    return (
+        BootstrapAdminResponse(id=user.id or 0, username=user.username, message="管理员初始化成功"),
+        auth_session,
+    )
 
 
 def login_user(session: Session, username: str, password: str) -> tuple[User, UserSession]:

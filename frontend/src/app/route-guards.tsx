@@ -5,12 +5,16 @@ import type { UserSummary } from '../types/api'
 
 type GuestRouteProps = {
   user: UserSummary | null
+  needsSetup?: boolean
   children: ReactNode
 }
 
-export function GuestRoute({ user, children }: GuestRouteProps) {
+export function GuestRoute({ user, needsSetup, children }: GuestRouteProps) {
   if (user) {
     return <Navigate to={user.must_change_password ? '/password' : '/kvms'} replace />
+  }
+  if (needsSetup) {
+    return <Navigate to="/setup" replace />
   }
 
   return <>{children}</>
@@ -18,11 +22,29 @@ export function GuestRoute({ user, children }: GuestRouteProps) {
 
 type ProtectedRouteProps = {
   user: UserSummary | null
+  needsSetup?: boolean
   children: ReactNode
 }
 
-export function ProtectedRoute({ user, children }: ProtectedRouteProps) {
+export function ProtectedRoute({ user, needsSetup, children }: ProtectedRouteProps) {
   if (!user) {
+    return <Navigate to={needsSetup ? '/setup' : '/login'} replace />
+  }
+
+  return <>{children}</>
+}
+
+type SetupRouteProps = {
+  user: UserSummary | null
+  needsSetup: boolean
+  children: ReactNode
+}
+
+export function SetupRoute({ user, needsSetup, children }: SetupRouteProps) {
+  if (user) {
+    return <Navigate to={user.must_change_password ? '/password' : '/kvms'} replace />
+  }
+  if (!needsSetup) {
     return <Navigate to="/login" replace />
   }
 
