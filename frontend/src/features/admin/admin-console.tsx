@@ -1,5 +1,5 @@
 import { FormEvent, useMemo } from 'react'
-import { CheckCircle2, Cpu, HardDrive, Server, Users } from 'lucide-react'
+import { CheckCircle2, Cpu, HardDrive, HelpCircle, Server, Users } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -121,6 +121,22 @@ export function AdminConsole({
                   <Input id="token_secret" type="password" value={nodeForm.token_secret} onChange={(event) => onNodeFormChange((prev) => ({ ...prev, token_secret: event.target.value }))} />
                 </div>
               </div>
+              <details className="group rounded-lg border border-slate-200 bg-slate-50">
+                <summary className="flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  <HelpCircle className="h-4 w-4 text-slate-400" />
+                  如何获取 PVE API Token？
+                </summary>
+                <div className="space-y-2 border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
+                  <p>在 PVE Web 管理界面中：</p>
+                  <ol className="list-decimal space-y-1 pl-4">
+                    <li>进入 <strong>Datacenter → Permissions → API Tokens</strong></li>
+                    <li>点击 <strong>Add</strong>，选择用户（如 <code className="rounded bg-slate-200 px-1">root@pam</code>）</li>
+                    <li>输入 Token ID（如 <code className="rounded bg-slate-200 px-1">panel</code>），取消勾选 Privilege Separation</li>
+                    <li>点击 <strong>Add</strong> 后，<strong>立即复制显示的 Secret</strong>（仅显示一次）</li>
+                    <li>将 Token ID（格式：<code className="rounded bg-slate-200 px-1">用户@realm!tokenid</code>）和 Secret 填入上方表单</li>
+                  </ol>
+                </div>
+              </details>
               <div className="flex flex-wrap gap-3">
                 <Button disabled={submitting} type="submit">{submitting ? '校验中...' : '校验节点'}</Button>
                 <Button disabled={submitting || !validationResult?.save_allowed} type="button" variant="outline" onClick={() => void onCreateNode()}>

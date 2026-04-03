@@ -20,7 +20,7 @@ export function KvmListPage({ kvms, error, formatBytes, formatPercent, onOpenDet
           <Monitor className="h-5 w-5" />
           <CardTitle>我的 KVM</CardTitle>
         </div>
-        <CardDescription>列表数据来自后端授权过滤后的 `/api/user/kvms`。</CardDescription>
+        <CardDescription>当前账号已授权的虚拟机列表。</CardDescription>
       </CardHeader>
       <CardContent>
         {error ? <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</div> : null}

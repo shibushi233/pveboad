@@ -23,8 +23,8 @@ export function LoginPage({ loginForm, submitting, error, onLoginFormChange, onS
             <Shield className="h-6 w-6" />
           </div>
           <div>
-            <CardTitle>登录轻量级 PVE 管理系统</CardTitle>
-            <CardDescription>界面风格按 ui.shadcn.com 方向搭建，当前已接入基础登录流程。</CardDescription>
+            <CardTitle>登录 PVE 管理系统</CardTitle>
+            <CardDescription>请使用管理员创建的账号登录。</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
