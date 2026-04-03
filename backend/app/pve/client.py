@@ -52,7 +52,7 @@ class PVEClient:
             return None
         version = version.strip()
         for supported in settings.allowed_pve_versions:
-            if version.startswith(supported):
+            if version.startswith(supported) or supported.startswith(version):
                 return supported
         return version
 
