@@ -14,6 +14,7 @@ from app.models.user import User
 from app.pve.client import PVEClient
 from app.schemas.vnc import VNCBootstrapResponse
 from app.services.auth_service import get_user_by_session_token
+from app.services.node_service import resolve_pve_node_name
 
 
 async def get_vnc_bootstrap(session: Session, user: User, node_id: int, vmid: int) -> VNCBootstrapResponse:
@@ -51,7 +52,8 @@ async def proxy_vnc_websocket(websocket: WebSocket, session: Session, node_id: i
     await websocket.accept()
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    proxy_data = await client.get_kvm_vnc_proxy(node.pve_node_name or node.name, vmid)
+    pve_name = await resolve_pve_node_name(session, node)
+    proxy_data = await client.get_kvm_vnc_proxy(pve_name, vmid)
     parsed = urlparse(node.api_base_url)
     port = proxy_data.get("port")
     ticket = proxy_data.get("ticket")
@@ -62,7 +64,7 @@ async def proxy_vnc_websocket(websocket: WebSocket, session: Session, node_id: i
     ws_scheme = "wss" if parsed.scheme == "https" else "ws"
     upstream_url = (
         f"{ws_scheme}://{parsed.hostname}:{parsed.port or 8006}"
-        f"/api2/json/nodes/{node.pve_node_name or node.name}/qemu/{vmid}/vncwebsocket?port={port}&vncticket={ticket}"
+        f"/api2/json/nodes/{pve_name}/qemu/{vmid}/vncwebsocket?port={port}&vncticket={ticket}"
     )
 
     try:

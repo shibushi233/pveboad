@@ -15,6 +15,7 @@ from app.schemas.kvm import (
     NodeMetricsPoint,
     NodeMonitoringResponse,
 )
+from app.services.node_service import resolve_pve_node_name
 
 
 def _extract_networks(config: dict) -> list[KVMNetworkItem]:
@@ -87,7 +88,8 @@ async def list_authorized_kvms(session: Session, user: User) -> list[AuthorizedK
             continue
 
         client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-        inventory = await client.list_kvms_on_node(node.pve_node_name or node.name)
+        pve_name = await resolve_pve_node_name(session, node)
+        inventory = await client.list_kvms_on_node(pve_name)
         matched = next((vm for vm in inventory if vm.get("vmid") == permission.vmid), None)
 
         items.append(
@@ -110,8 +112,9 @@ async def list_authorized_kvms(session: Session, user: User) -> list[AuthorizedK
 async def get_kvm_detail(session: Session, user: User, node_id: int, vmid: int) -> KVMDetailResponse:
     permission, node = _get_authorized_permission(session, user, vmid, node_id)
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    status = await client.get_kvm_status(node.pve_node_name or node.name, vmid)
-    config = await client.get_kvm_config(node.pve_node_name or node.name, vmid)
+    pve_name = await resolve_pve_node_name(session, node)
+    status = await client.get_kvm_status(pve_name, vmid)
+    config = await client.get_kvm_config(pve_name, vmid)
 
     return KVMDetailResponse(
         node_id=node.id or 0,
@@ -134,7 +137,8 @@ async def run_kvm_action(session: Session, user: User, node_id: int, vmid: int, 
         raise ValidationError("不支持的操作")
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    task_id = await client.post_kvm_action(node.pve_node_name or node.name, vmid, action)
+    pve_name = await resolve_pve_node_name(session, node)
+    task_id = await client.post_kvm_action(pve_name, vmid, action)
     return KVMActionResponse(
         node_id=node.id or 0,
         node_name=node.name,
@@ -148,7 +152,8 @@ async def run_kvm_action(session: Session, user: User, node_id: int, vmid: int, 
 async def get_kvm_current_metrics(session: Session, user: User, node_id: int, vmid: int) -> KVMCurrentMetricsResponse:
     _, node = _get_authorized_permission(session, user, vmid, node_id)
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    status = await client.get_kvm_status(node.pve_node_name or node.name, vmid)
+    pve_name = await resolve_pve_node_name(session, node)
+    status = await client.get_kvm_status(pve_name, vmid)
     return KVMCurrentMetricsResponse(
         node_id=node.id or 0,
         node_name=node.name,
@@ -181,7 +186,8 @@ async def get_node_monitoring(session: Session, user: User, node_id: int, timefr
         raise NotFoundError("节点不存在或已禁用")
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    rows = await client.get_node_rrddata(node.pve_node_name or node.name, timeframe)
+    pve_name = await resolve_pve_node_name(session, node)
+    rows = await client.get_node_rrddata(pve_name, timeframe)
     points = [
         NodeMetricsPoint(
             time=row.get("time"),

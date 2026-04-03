@@ -25,6 +25,7 @@ async def test_get_node_inventory_returns_mapped_kvms(monkeypatch: pytest.Monkey
     with Session(engine) as session:
         node = PVENode(
             name="node1",
+            pve_node_name="node1",
             api_base_url="https://pve.example:8006",
             token_id="id",
             token_secret_encrypted=encrypt_token("secret"),

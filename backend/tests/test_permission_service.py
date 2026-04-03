@@ -25,6 +25,7 @@ async def test_assign_permission(monkeypatch: pytest.MonkeyPatch) -> None:
         user = User(username="user1", password_hash="hashed")
         node = PVENode(
             name="node1",
+            pve_node_name="node1",
             api_base_url="https://pve.example:8006",
             token_id="id",
             token_secret_encrypted=encrypt_token("secret"),
@@ -56,6 +57,7 @@ async def test_assign_permission_raises_for_missing_user() -> None:
     with Session(engine) as session:
         node = PVENode(
             name="node1",
+            pve_node_name="node1",
             api_base_url="https://pve.example:8006",
             token_id="id",
             token_secret_encrypted=encrypt_token("secret"),
@@ -99,6 +101,7 @@ async def test_assign_permission_raises_for_duplicate_permission(monkeypatch: py
         user = User(username="user1", password_hash="hashed")
         node = PVENode(
             name="node1",
+            pve_node_name="node1",
             api_base_url="https://pve.example:8006",
             token_id="id",
             token_secret_encrypted=encrypt_token("secret"),
@@ -131,6 +134,7 @@ async def test_assign_permission_raises_for_unknown_vmid(monkeypatch: pytest.Mon
         user = User(username="user1", password_hash="hashed")
         node = PVENode(
             name="node1",
+            pve_node_name="node1",
             api_base_url="https://pve.example:8006",
             token_id="id",
             token_secret_encrypted=encrypt_token("secret"),

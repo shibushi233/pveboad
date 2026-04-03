@@ -32,6 +32,7 @@ def test_get_authorized_node_returns_node_for_permitted_user() -> None:
         user = User(username='u1', password_hash='x', role='user', is_active=True)
         node = PVENode(
             name='node-a',
+            pve_node_name='node-a',
             api_base_url='https://pve.example:8006',
             token_id='id',
             token_secret_encrypted=encrypt_token('secret'),
@@ -61,6 +62,7 @@ async def test_get_vnc_bootstrap_returns_expected_payload() -> None:
         user = User(username='u1', password_hash='x', role='user', is_active=True)
         node = PVENode(
             name='node-a',
+            pve_node_name='node-a',
             api_base_url='https://pve.example:8006',
             token_id='id',
             token_secret_encrypted=encrypt_token('secret'),

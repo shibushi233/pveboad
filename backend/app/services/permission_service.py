@@ -7,6 +7,7 @@ from app.models.pve_node import PVENode
 from app.models.user import User
 from app.pve.client import PVEClient
 from app.schemas.permission import PermissionAssignRequest, PermissionItem
+from app.services.node_service import resolve_pve_node_name
 
 
 async def assign_permission(session: Session, payload: PermissionAssignRequest) -> PermissionItem:
@@ -30,7 +31,8 @@ async def assign_permission(session: Session, payload: PermissionAssignRequest) 
         raise ConflictError("该权限已存在")
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    kvms = await client.list_kvms_on_node(node.pve_node_name or node.name)
+    pve_name = await resolve_pve_node_name(session, node)
+    kvms = await client.list_kvms_on_node(pve_name)
     if payload.vmid not in {int(item["vmid"]) for item in kvms if item.get("vmid") is not None}:
         raise NotFoundError("该 VMID 不存在于当前节点")
 

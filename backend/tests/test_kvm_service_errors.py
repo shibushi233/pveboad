@@ -22,6 +22,7 @@ def setup(session):
     user = User(username="u1", password_hash="x", role="user", is_active=True, must_change_password=False)
     node = PVENode(
         name="node-a",
+        pve_node_name="node-a",
         api_base_url="https://pve:8006",
         token_id="id",
         token_secret_encrypted=encrypt_token("secret"),

@@ -40,6 +40,7 @@ def test_add_permission_route_returns_400_for_invalid_vmid(monkeypatch) -> None:
         user = User(username="user1", password_hash="hashed", role="user", is_active=True, must_change_password=False)
         node = PVENode(
             name="node1",
+            pve_node_name="node1",
             api_base_url="https://pve.example:8006",
             token_id="id",
             token_secret_encrypted=encrypt_token("secret"),

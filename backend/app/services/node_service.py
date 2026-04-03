@@ -10,6 +10,23 @@ from app.schemas.node import NodeCreateRequest, NodeCreateResponse, NodeInventor
 from app.services.node_validation import validate_node_for_create
 
 
+async def resolve_pve_node_name(session: Session, node: PVENode) -> str:
+    """Return the real PVE hostname, auto-discovering and caching if missing."""
+    if node.pve_node_name:
+        return node.pve_node_name
+    client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
+    nodes = await client.get_cluster_nodes()
+    if not nodes:
+        raise UpstreamError("PVE 集群未返回任何节点")
+    real_name = nodes[0].get("node")
+    if not real_name:
+        raise UpstreamError("无法获取 PVE 节点主机名")
+    node.pve_node_name = real_name
+    session.add(node)
+    session.commit()
+    return real_name
+
+
 async def create_node(session: Session, payload: NodeCreateRequest) -> NodeCreateResponse:
     validation = await validate_node_for_create(payload)
     if not validation.save_allowed or not validation.detected_version:
@@ -71,7 +88,7 @@ async def get_node_inventory(session: Session, node_id: int) -> NodeInventoryRes
         raise NotFoundError("节点不存在")
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    pve_name = node.pve_node_name or node.name
+    pve_name = await resolve_pve_node_name(session, node)
     kvms = await client.list_kvms_on_node(pve_name)
     return NodeInventoryResponse(
         node_id=node.id or 0,
