@@ -5,10 +5,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY backend/pyproject.toml /app/pyproject.toml
+COPY pyproject.toml /app/pyproject.toml
 RUN pip install --no-cache-dir .
 
-COPY backend /app
+COPY . /app
 
 RUN mkdir -p /data
 

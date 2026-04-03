@@ -10,6 +10,11 @@ export default defineConfig({
   build: {
     target: 'esnext',
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext',
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
