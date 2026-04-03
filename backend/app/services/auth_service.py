@@ -41,7 +41,7 @@ def bootstrap_admin(session: Session, payload: BootstrapAdminRequest) -> tuple[B
         password_hash=hash_password(payload.password),
         role="admin",
         is_active=True,
-        must_change_password=True,
+        must_change_password=False,
     )
     session.add(user)
     session.commit()
@@ -76,7 +76,7 @@ def get_user_by_session_token(session: Session, session_token: str) -> User | No
     auth_session = session.exec(select(UserSession).where(UserSession.session_token == session_token)).first()
     if not auth_session:
         return None
-    if auth_session.expires_at <= datetime.now(UTC):
+    if auth_session.expires_at.replace(tzinfo=None) <= datetime.utcnow():
         session.delete(auth_session)
         session.commit()
         return None
