@@ -23,7 +23,6 @@ function formatBytes(value: number | null) {
 }
 
 type NodeFormState = {
-  name: string
   api_base_url: string
   token_id: string
   token_secret: string
@@ -89,23 +88,17 @@ export function AdminConsole({
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={(event) => void onValidateNode(event)}>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="node_name">节点名称</Label>
-                  <Input id="node_name" value={nodeForm.name} onChange={(event) => onNodeFormChange((prev) => ({ ...prev, name: event.target.value }))} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="selected_version">PVE 版本</Label>
-                  <select
-                    id="selected_version"
-                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
-                    value={nodeForm.selected_version}
-                    onChange={(event) => onNodeFormChange((prev) => ({ ...prev, selected_version: event.target.value }))}
-                  >
-                    <option value="8.2.2">8.2.2</option>
-                    <option value="9.1.1">9.1.1</option>
-                  </select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="selected_version">PVE 版本</Label>
+                <select
+                  id="selected_version"
+                  className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                  value={nodeForm.selected_version}
+                  onChange={(event) => onNodeFormChange((prev) => ({ ...prev, selected_version: event.target.value }))}
+                >
+                  <option value="8.2.2">8.2.2</option>
+                  <option value="9.1.1">9.1.1</option>
+                </select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="api_base_url">API Base URL</Label>
@@ -154,6 +147,7 @@ export function AdminConsole({
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div>状态：{validationResult ? (validationResult.save_allowed ? '允许保存' : '禁止保存') : '未校验'}</div>
+            <div>节点名称：{validationResult?.pve_node_name ?? '—'}</div>
             <div>探测版本：{validationResult?.detected_version ?? '—'}</div>
             <div>提示：{validationResult?.message ?? '—'}</div>
             <div className="space-y-2">

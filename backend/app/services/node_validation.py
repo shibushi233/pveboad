@@ -13,6 +13,7 @@ async def validate_node_for_create(payload: NodeCreateRequest) -> NodeValidation
     )
     probe = await client.probe_version(payload.selected_version)
     discovered_kvms: list[NodeKVMInventoryItem] = []
+    pve_node_name: str | None = None
 
     if probe.save_allowed:
         # 自动从 PVE 集群获取真实节点主机名，而非使用用户填写的友好名称
@@ -57,4 +58,5 @@ async def validate_node_for_create(payload: NodeCreateRequest) -> NodeValidation
         save_allowed=probe.save_allowed,
         message=probe.message,
         discovered_kvms=discovered_kvms,
+        pve_node_name=pve_node_name if probe.save_allowed else None,
     )

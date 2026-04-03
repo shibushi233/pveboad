@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class NodeCreateRequest(BaseModel):
-    name: str = Field(min_length=1, max_length=128)
+    name: str = Field(default="", max_length=128)
     api_base_url: str
     token_id: str
     token_secret: str
@@ -27,6 +27,7 @@ class NodeValidationResult(BaseModel):
     save_allowed: bool
     message: str
     discovered_kvms: list[NodeKVMInventoryItem]
+    pve_node_name: str | None = None
 
 
 class NodeCreateResponse(BaseModel):

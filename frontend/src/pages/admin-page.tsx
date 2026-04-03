@@ -10,7 +10,6 @@ import type {
 } from '../types/api'
 
 type NodeFormState = {
-  name: string
   api_base_url: string
   token_id: string
   token_secret: string

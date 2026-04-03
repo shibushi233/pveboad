@@ -51,7 +51,7 @@ async def proxy_vnc_websocket(websocket: WebSocket, session: Session, node_id: i
     await websocket.accept()
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    proxy_data = await client.get_kvm_vnc_proxy(node.name, vmid)
+    proxy_data = await client.get_kvm_vnc_proxy(node.pve_node_name or node.name, vmid)
     parsed = urlparse(node.api_base_url)
     port = proxy_data.get("port")
     ticket = proxy_data.get("ticket")
@@ -62,7 +62,7 @@ async def proxy_vnc_websocket(websocket: WebSocket, session: Session, node_id: i
     ws_scheme = "wss" if parsed.scheme == "https" else "ws"
     upstream_url = (
         f"{ws_scheme}://{parsed.hostname}:{parsed.port or 8006}"
-        f"/api2/json/nodes/{node.name}/qemu/{vmid}/vncwebsocket?port={port}&vncticket={ticket}"
+        f"/api2/json/nodes/{node.pve_node_name or node.name}/qemu/{vmid}/vncwebsocket?port={port}&vncticket={ticket}"
     )
 
     try:

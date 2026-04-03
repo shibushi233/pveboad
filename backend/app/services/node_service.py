@@ -19,8 +19,11 @@ async def create_node(session: Session, payload: NodeCreateRequest) -> NodeCreat
     if existing:
         raise ConflictError("节点名称已存在")
 
+    display_name = payload.name or validation.pve_node_name or "unknown"
+    pve_node_name = validation.pve_node_name or payload.name
     node = PVENode(
-        name=payload.name,
+        name=display_name,
+        pve_node_name=pve_node_name,
         api_base_url=payload.api_base_url.rstrip("/"),
         token_id=payload.token_id,
         token_secret_encrypted=encrypt_token(payload.token_secret),
@@ -68,7 +71,8 @@ async def get_node_inventory(session: Session, node_id: int) -> NodeInventoryRes
         raise NotFoundError("节点不存在")
 
     client = PVEClient(node.api_base_url, node.token_id, decrypt_token(node.token_secret_encrypted))
-    kvms = await client.list_kvms_on_node(node.name)
+    pve_name = node.pve_node_name or node.name
+    kvms = await client.list_kvms_on_node(pve_name)
     return NodeInventoryResponse(
         node_id=node.id or 0,
         node_name=node.name,

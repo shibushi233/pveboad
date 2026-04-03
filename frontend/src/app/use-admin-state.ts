@@ -14,7 +14,7 @@ import type {
 } from '../types/api'
 
 export function useAdminState() {
-  const [nodeForm, setNodeForm] = useState({ name: '', api_base_url: '', token_id: '', token_secret: '', selected_version: '8.2.2' })
+  const [nodeForm, setNodeForm] = useState({ api_base_url: '', token_id: '', token_secret: '', selected_version: '8.2.2' })
   const [permissionForm, setPermissionForm] = useState({ user_id: '', pve_node_id: '', vmid: '' })
   const [adminUsers, setAdminUsers] = useState<AdminUserItem[]>([])
   const [nodes, setNodes] = useState<NodeItem[]>([])
@@ -81,8 +81,8 @@ export function useAdminState() {
     setAdminError(null)
     try {
       const result = await apiFetch<NodeCreateResponse>('/admin/nodes', { method: 'POST', body: JSON.stringify(nodeForm) })
-      setValidationResult({ reachable: true, selected_version: result.selected_version, detected_version: result.detected_version, save_allowed: true, message: result.message, discovered_kvms: result.discovered_kvms })
-      setNodeForm({ name: '', api_base_url: '', token_id: '', token_secret: '', selected_version: result.selected_version })
+      setValidationResult({ reachable: true, selected_version: result.selected_version, detected_version: result.detected_version, save_allowed: true, message: result.message, discovered_kvms: result.discovered_kvms, pve_node_name: result.name })
+      setNodeForm({ api_base_url: '', token_id: '', token_secret: '', selected_version: result.selected_version })
       setPageMessage(result.message)
       await loadAdminData()
     } catch (err) {

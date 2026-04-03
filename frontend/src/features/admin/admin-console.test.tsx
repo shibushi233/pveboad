@@ -21,7 +21,7 @@ function renderAdminConsole() {
       selectedAdminUserId={3}
       validationResult={null}
       selectedNodeInventory={{ node_id: 7, node_name: 'node-a', kvms: [{ vmid: 101, name: 'vm-101', status: 'running', cpu: 0.5, maxmem: 1024, maxdisk: 2048 }] }}
-      nodeForm={{ name: '', api_base_url: '', token_id: '', token_secret: '', selected_version: '8.2.2' }}
+      nodeForm={{ api_base_url: '', token_id: '', token_secret: '', selected_version: '8.2.2' }}
       permissionForm={{ user_id: '3', pve_node_id: '7', vmid: '' }}
       onNodeFormChange={onNodeFormChange}
       onPermissionFormChange={onPermissionFormChange}
@@ -69,7 +69,7 @@ describe('AdminConsole', () => {
         selectedAdminUserId={null}
         validationResult={null}
         selectedNodeInventory={null}
-        nodeForm={{ name: '', api_base_url: '', token_id: '', token_secret: '', selected_version: '8.2.2' }}
+        nodeForm={{ api_base_url: '', token_id: '', token_secret: '', selected_version: '8.2.2' }}
         permissionForm={{ user_id: '', pve_node_id: '', vmid: '' }}
         onNodeFormChange={vi.fn()}
         onPermissionFormChange={vi.fn()}

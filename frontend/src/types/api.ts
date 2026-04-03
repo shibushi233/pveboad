@@ -112,6 +112,7 @@ export type NodeValidationResult = {
   save_allowed: boolean
   message: string
   discovered_kvms: NodeKVMInventoryItem[]
+  pve_node_name: string | null
 }
 
 export type NodeItem = {
