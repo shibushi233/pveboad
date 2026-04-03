@@ -27,14 +27,18 @@ async def test_validate_node_for_create_loads_discovered_kvms_when_save_allowed(
             discovered_kvms=[],
         )
 
+    async def fake_get_cluster_nodes(self) -> list[dict]:
+        return [{"node": "pve-host", "status": "online"}]
+
     async def fake_list_kvms_on_node(self, node_name: str) -> list[dict]:
-        assert node_name == "node1"
+        assert node_name == "pve-host"
         return [
             {"vmid": 101, "name": "vm-101", "status": "running", "cpu": 0.5, "maxmem": 1024, "maxdisk": 2048},
             {"vmid": None, "name": "ignored"},
         ]
 
     monkeypatch.setattr("app.services.node_validation.PVEClient.probe_version", fake_probe_version)
+    monkeypatch.setattr("app.services.node_validation.PVEClient.get_cluster_nodes", fake_get_cluster_nodes)
     monkeypatch.setattr("app.services.node_validation.PVEClient.list_kvms_on_node", fake_list_kvms_on_node)
 
     result = await validate_node_for_create(

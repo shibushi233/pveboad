@@ -135,6 +135,11 @@ class PVEClient:
             message="节点校验通过",
         )
 
+    async def get_cluster_nodes(self) -> list[dict]:
+        payload = await self._get_json("/api2/json/nodes")
+        data = payload.get("data")
+        return data if isinstance(data, list) else []
+
     async def list_kvms_on_node(self, node_name: str) -> list[dict]:
         payload = await self._get_json(f"/api2/json/nodes/{node_name}/qemu")
         data = payload.get("data")
