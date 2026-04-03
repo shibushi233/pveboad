@@ -10,7 +10,7 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "dependencies": {
-    "@novnc/novnc": "^1.6.0",
+    "@novnc/novnc": "1.5.0",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
